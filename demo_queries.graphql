@@ -1,0 +1,304 @@
+# ========================
+# REPORTS                =
+# ========================
+
+# ========================
+# 1. Add a Professional
+# ========================
+
+mutation {
+  agregarProfesional(
+    cedula: "604840754",
+    nombre: "Luis López",
+    genero: "Masculino",
+    profesiones: ["Informática", "Electricista"]
+  ) {
+    cedula
+    nombre
+    profesiones
+  }
+}
+
+# ========================
+# 2. Add an Employer (Company with a lot of vacancies)
+# ========================
+
+mutation {
+  agregarEmpleador(
+    cedula: "302570430",
+    nombre: "PuertoTech",
+    tipo: "JURIDICA"
+  ) {
+    cedula
+    nombre
+    tipo
+  }
+}
+
+# ========================
+# 3. Add a Vacancy (you must replace empresaId with a valid one)
+# ========================
+
+# V1
+mutation {
+  agregarVacante(
+    titulo: "Analista de Datos",
+    area: "Informática",
+    descripcion: "Responsable de análisis y visualización de datos para apoyar la toma de decisiones",
+    empresaCedula: "302570430"
+  ) {
+    _id
+    titulo
+  }
+}
+
+# V2
+mutation {
+  agregarVacante(
+    titulo: "Desarrollador Backend",
+    area: "Informática",
+    descripcion: "Desarrollo y mantenimiento de APIs y servicios para aplicaciones empresariales",
+    empresaCedula: "302570430"
+  ) {
+    _id
+    titulo
+  }
+}
+
+# V3
+mutation {
+  agregarVacante(
+    titulo: "Especialista en Ciberseguridad",
+    area: "Informática",
+    descripcion: "Implementación de medidas de seguridad y monitoreo de vulnerabilidades",
+    empresaCedula: "302570430"
+  ) {
+    _id
+    titulo
+  }
+}
+
+# ========================
+# 4. Add an Expediente (replace profesionalId)
+# ========================
+
+python .\scripts\Img_Base64\encode_titulo.py
+
+query {
+  profesional(cedula: "604840754") {
+    nombre
+    expediente {
+      titulos {
+        _id
+        nombre
+        imagenUrl
+      }
+    }
+  }
+}
+
+# ========================
+# 5. Postular a Vacante (replace IDs) X3
+# ========================
+
+# Obtener IDs (profesional y vacantes)
+
+query GetIds {
+  prof: profesional(cedula: "604840754") { _id nombre }
+  vacs: vacantes { _id titulo }
+}
+
+# Postularse a 3 vacantes distintas.
+
+Variables:
+
+{
+  "prof": "689c15dcee23014d3f48a753",
+  "v1":  "689c1852ee23014d3f48a75d",
+  "v2":  "689c1879ee23014d3f48a760",
+  "v3":  "689c187fee23014d3f48a763"
+}
+
+Mutaciones: 
+
+mutation Postular3Veces($prof: ID!, $v1: ID!, $v2: ID!, $v3: ID!) {
+  post1: postularVacante(profesionalId: $prof, vacanteId: $v1) {
+    cedula
+    nombre
+    postulaciones {
+      fecha
+      vacante {
+        _id
+        titulo
+        area
+        empresa { cedula nombre }
+      }
+    }
+  }
+  post2: postularVacante(profesionalId: $prof, vacanteId: $v2) {
+    cedula
+    nombre
+    postulaciones {
+      fecha
+      vacante {
+        _id
+        titulo
+        area
+        empresa { cedula nombre }
+      }
+    }
+  }
+  post3: postularVacante(profesionalId: $prof, vacanteId: $v3) {
+    cedula
+    nombre
+    postulaciones {
+      fecha
+      vacante {
+        _id
+        titulo
+        area
+        empresa { cedula nombre }
+      }
+    }
+  }
+}
+
+# V4
+mutation {
+  agregarVacante(
+    titulo: "Administrador de Base de Datos",
+    area: "Informática",
+    descripcion: "Gestión, optimización y respaldo de bases de datos para garantizar disponibilidad y seguridad de la información",
+    empresaCedula: "302570430"
+  ) {
+    _id
+    titulo
+  }
+}
+
+query GetIds {
+  prof: profesional(cedula: "604840754") { _id nombre }
+  vacs: vacantes { _id titulo }
+}
+
+{
+  "prof": "689c15dcee23014d3f48a753",
+  "v4":  "689c20669626b587ad2b8f38"
+}
+
+
+
+
+// postula una vacante individual xd
+
+
+
+
+mutation Postular4ta($prof: ID!, $v4: ID!) {
+  post4: postularVacante(profesionalId: $prof, vacanteId: $v4) {
+    cedula nombre
+  }
+}
+
+# Debe mostrar error.
+
+# Verificar postulaciones del profesional.
+
+query VerPostulaciones {
+  profesional(cedula: "604840754") {
+    nombre
+    postulaciones {
+      fecha
+      vacante {
+        _id
+        titulo
+        area
+        empresa {
+          cedula
+          nombre
+        }
+      }
+    }
+  }
+}
+
+# ========================
+# 6. List All Professionals
+# ========================
+
+query {
+  profesionales {
+    cedula
+    nombre
+    genero
+    profesiones
+  }
+}
+
+# ========================
+# 7. List All Employers
+# ========================
+
+query {
+  empleadores {
+    cedula
+    nombre
+    tipo
+    puestosOfertados {
+      titulo
+      area
+    }
+  }
+}
+
+# ========================
+# 8. List All Vacancies
+# ========================
+
+query {
+  vacantes {
+    titulo
+    area
+    descripcion
+    empresa {
+      nombre
+    }
+  }
+}
+
+# ========================
+# 9. Get Professionals by Area
+# ========================
+
+query {
+  postulantesPorArea(area: "Informática") {
+    nombre
+    empresas
+  }
+}
+
+# ========================
+# 10. Area Count & Percentage
+# ========================
+
+query {
+  conteoPorArea {
+    area
+    total
+    porcentaje
+  }
+}
+
+# ========================
+# 11. Gender Distribution
+# ========================
+
+query {
+  conteoPorGenero {
+    genero
+    total
+  }
+}
+
+
+

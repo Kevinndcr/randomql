@@ -1,0 +1,164 @@
+# Paso a paso: Implementación de Hadoop + Apache Spark en Ubuntu (VirtualBox) para tu proyecto GraphQL
+
+1. **Prepara la VM Ubuntu**
+   - Instala Ubuntu Server en VirtualBox.
+   - Configura red NAT y reenvío de puertos para SSH y GraphQL (ejemplo: 4000).
+
+2. **Instala Java (requisito para Hadoop y Spark)**
+   ```bash
+   sudo apt update
+   sudo apt install openjdk-11-jdk -y
+   java -version
+   ```
+
+3. **Instala Hadoop**
+   - Descarga Hadoop:
+     ```bash
+     wget https://downloads.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
+     tar -xzvf hadoop-3.3.6.tar.gz
+     sudo mv hadoop-3.3.6 /usr/local/hadoop
+     ```
+   - Configura variables de entorno en `~/.bashrc`:
+     ```bash
+     export HADOOP_HOME=/usr/local/hadoop
+     export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+     export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+     source ~/.bashrc
+     ```
+   - Configura archivos básicos (`core-site.xml`, `hdfs-site.xml`, `mapred-site.xml`, `yarn-site.xml`).
+   - Formatea el sistema de archivos:
+     ```bash
+     hdfs namenode -format
+     ```
+   - Inicia Hadoop:
+     ```bash
+     start-dfs.sh
+     start-yarn.sh
+     ```
+
+4. **Instala Apache Spark**
+   - Descarga Spark:
+     ```bash
+     wget https://downloads.apache.org/spark/spark-3.5.1/spark-3.5.1-bin-hadoop3.tgz
+     tar -xzvf spark-3.5.1-bin-hadoop3.tgz
+     sudo mv spark-3.5.1-bin-hadoop3 /usr/local/spark
+     ```
+   - Configura variables de entorno en `~/.bashrc`:
+     ```bash
+     export SPARK_HOME=/usr/local/spark
+     export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+     source ~/.bashrc
+     ```
+
+5. **Exporta tus datos de MongoDB**
+   - Instala MongoDB en Ubuntu o exporta desde tu máquina física:
+     ```bash
+     mongoexport --db ProyectoFinal --collection profesionales --out profesionales.json
+     mongoexport --db ProyectoFinal --collection empleadores --out empleadores.json
+     # Repite para cada colección
+     ```
+
+6. **Sube los archivos a HDFS**
+   ```bash
+   hdfs dfs -mkdir /user/ubuntu
+   hdfs dfs -put profesionales.json /user/ubuntu/
+   hdfs dfs -put empleadores.json /user/ubuntu/
+   # Repite para cada archivo
+   ```
+
+7. **Procesa los datos con Spark**
+   - Instala Python y PySpark:
+     ```bash
+     sudo apt install python3-pip -y
+     pip3 install pyspark
+     ```
+   - Ejemplo de script:
+     ```python
+     from pyspark.sql import SparkSession
+     spark = SparkSession.builder.appName("AnalisisProfesionales").getOrCreate()
+     df = spark.read.json("hdfs:///user/ubuntu/profesionales.json")
+     df.groupBy("titulo").count().show()
+     ```
+   - Ejecuta el script:
+     ```bash
+     python3 tu_script.py
+     ```
+
+8. **Accede a tu servidor GraphQL desde la máquina física**
+   - Inicia tu servidor GraphQL en la VM Ubuntu, asegurándote de que escuche en `0.0.0.0`.
+   - Accede desde tu navegador físico usando el puerto configurado en el reenvío de puertos (ejemplo: `http://localhost:4000`).
+
+---
+
+# Paso a paso para instalar y ejecutar el servidor Apollo GraphQL con MongoDB en Ubuntu (VirtualBox)
+
+1. **Descarga el proyecto desde GitHub**
+   ```bash
+   sudo apt update
+   sudo apt install git -y
+   git clone https://github.com/LoesssLR/GraphQLApollo_FinalProject.git
+   cd GraphQLApollo_FinalProject
+   ```
+
+2. **Instala Node.js y npm**
+   ```bash
+   sudo apt install nodejs npm -y
+   node -v
+   npm -v
+   ```
+
+3. **Instala MongoDB**
+   ```bash
+   sudo apt install mongodb -y
+   sudo systemctl start mongodb
+   sudo systemctl enable mongodb
+   # Verifica que MongoDB esté corriendo
+   sudo systemctl status mongodb
+   ```
+
+4. **Configura el archivo .env**
+   - Edita el archivo `.env` y asegúrate de tener:
+     ```env
+     MONGO_URL=mongodb://localhost:27017/ProyectoFinal
+     DB_NAME=ProyectoFinal
+     PORT=4000
+     IMG_PORT=4001
+     ```
+
+5. **Instala las dependencias del proyecto**
+   ```bash
+   npm install
+   ```
+
+6. **Carga los datos iniciales a MongoDB (opcional)**
+   ```bash
+   npm run load:all
+   ```
+
+7. **Ejecuta el servidor Apollo GraphQL**
+   ```bash
+   npm start
+   ```
+   - El servidor GraphQL estará disponible en el puerto configurado (`PORT`).
+   - El servidor de imágenes estará disponible en el puerto `IMG_PORT`.
+
+8. **Configura el reenvío de puertos en VirtualBox**
+   - Asegúrate de tener reglas para los puertos 4000 (GraphQL) y 4001 (imágenes).
+   - Accede desde tu máquina física a:
+     - `http://localhost:4000` para GraphQL
+     - `http://localhost:4001/api/titulos/:id/imagen` para imágenes
+
+---
+
+# Requisitos del proyecto
+- Ubuntu Server (VirtualBox)
+- Node.js y npm
+- MongoDB
+- Git
+- Acceso a puertos 4000 y 4001 (reenvío NAT)
+- Variables de entorno configuradas en `.env`
+- Dependencias instaladas con `npm install`
+
+---
+
+# El resto del archivo continúa...
