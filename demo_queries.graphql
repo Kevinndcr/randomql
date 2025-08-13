@@ -301,4 +301,19 @@ query {
 }
 
 
+### PAra las imagenes
 
+mutation {
+  agregarExpediente(
+    profesionalCedula: "604840754",
+    titulos: [{ nombre: "Titulo de inglés." }],
+    experiencias: []
+  ) {
+    titulos { _id nombre imagenUrl }
+  }
+}
+
+da una url, esa url va a postman con FORM DATA,
+key: file
+
+se adjunta la img, la cual será enviada al servidor del puerto 4001
